@@ -13,13 +13,11 @@ import (
 )
 
 func NewDatabase() controllers.Database {
-	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGO_URI")))
+	client, err := mongo.Connect(
+		context.TODO(),
+		options.Client().ApplyURI(os.Getenv("MONGO_URI_DOCKER")))
 	if err != nil {
-		panic(err.Error())
-	}
-	err = client.Connect(context.TODO())
-	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 
 	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Err(); err != nil {
@@ -28,8 +26,8 @@ func NewDatabase() controllers.Database {
 	fmt.Println("connected to MongoDB...")
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_DB_ADDR"),
-		Password: os.Getenv("REDIS_DB_PASS"),
+		Addr:     os.Getenv("REDIS_URI_DOCKER"),
+		Password: "",
 		DB:       0,
 	})
 

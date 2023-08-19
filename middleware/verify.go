@@ -32,7 +32,7 @@ func VerifyTokenAndDb(c *fiber.Ctx, mongoClient *mongo.Client, redisClient *redi
 	}
 
 	filter := bson.M{"email": email}
-	userCollection := mongoClient.Database("blabber").Collection("users")
+	userCollection := mongoClient.Database("custom-auth").Collection("users")
 	var user models.User
 	err = userCollection.FindOne(context.Background(), filter).Decode(&user)
 	if err != nil {

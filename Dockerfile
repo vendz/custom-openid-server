@@ -2,7 +2,8 @@
 FROM golang:alpine AS build
 
 RUN apk update && apk upgrade && \
-    apk add --no-cache git
+    apk add --no-cache git && \
+    rm -rf /var/cache/apk/*
 
 WORKDIR /app
 
