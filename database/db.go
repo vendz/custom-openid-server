@@ -15,7 +15,7 @@ import (
 func NewDatabase() controllers.Database {
 	client, err := mongo.Connect(
 		context.TODO(),
-		options.Client().ApplyURI(os.Getenv("MONGO_URI_DOCKER")))
+		options.Client().ApplyURI(os.Getenv("MONGO_URI_LOCAL")))
 	if err != nil {
 		panic(err)
 	}
@@ -26,7 +26,7 @@ func NewDatabase() controllers.Database {
 	fmt.Println("connected to MongoDB...")
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_URI_DOCKER"),
+		Addr:     os.Getenv("REDIS_URI_LOCAL"),
 		Password: "",
 		DB:       0,
 	})

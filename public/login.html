@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <img src="assets/logo.png" alt="ISTE Logo">
+            <form>
+                <input id="email" type="email" placeholder="Email" required>
+                <input id="password" type="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p class="forgot-password">Forgot password?</p>
+            <p class="signup-link">Don't have an account? <a href="signup.html">Sign up</a></p>
+        </div>
+    </div>
+    <script src="scripts/login.js"></script>
+
+    <script>
+        const loginForm = document.querySelector('form');
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userData = {
+                Email: loginForm.email.value,
+                Password: loginForm.password.value
+            }
+            
+            const queryString = window.location.search;
+            const params = new URLSearchParams(queryString);
+            const redirect = params.get('return_to');
+            const client_id = params.get('client_id');
+            if (redirect === null || client_id === null) {
+                alert('Invalid request');
+                return;
+            }
+            await handleLogin(userData, redirect, client_id);
+            window.postMessage('Login successful', '*');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="styles/signup.css">
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-box">
+            <img src="assets/logo.png" alt="Logo" class="logo">
+            <h2>Create an Account</h2>
+            <form id="signup-form">
+                <input type="text" id="name" placeholder="Name" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <input type="tel" id="phone" placeholder="Phone Number" required>
+                <textarea id="bio" placeholder="Bio" maxlength="150" required></textarea>
+                <input type="file" id="profile-pic" accept="image/*">
+                <button type="submit" id="signup-button">Sign Up</button>
+            </form>
+            <p class="signup-link">Already have an account? <a href="login.html">Log in</a></p>
+        </div>
+    </div>
+    <script src="scripts/signup.js"></script>
+    <script>
+        const signupForm = document.querySelector('form');
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                Name: signupForm.name.value,
+                Email: signupForm.email.value,
+                Password: signupForm.password.value,
+                PhoneNumber: signupForm.phone.value,
+                Bio: signupForm.bio.value,
+                // profilePic: signupForm['profile-pic'].files[0]
+            }
+            const queryString = window.location.search;
+            const params = new URLSearchParams(queryString);
+            const redirect = params.get('return_to');
+            const client_id = params.get('client_id');
+            await handleSignup(data, redirect, client_id);
+            signupForm.reset();
+        });
+    </script>
+</body>
+</html>

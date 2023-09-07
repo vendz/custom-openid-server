@@ -1,24 +1,21 @@
 # Build stage
-FROM golang:alpine AS build
+FROM golang:1.21-alpine AS build
 
-RUN apk update && apk upgrade && \
-    apk add --no-cache git && \
-    rm -rf /var/cache/apk/*
+RUN apk update && \
+    apk add --no-cache git
 
 WORKDIR /app
 
-ADD go.mod .
-ADD go.sum .
-
+COPY go.mod go.sum ./
 RUN go mod download
-ADD . .
 
+COPY . .
 RUN go build -o main
 
 # Final image
 FROM alpine
 
-RUN apk update && apk upgrade && \
+RUN apk update && \
     apk add --no-cache ca-certificates
 
 WORKDIR /app

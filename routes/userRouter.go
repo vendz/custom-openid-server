@@ -7,8 +7,9 @@ import (
 )
 
 func UserRoutes(incomingRoutes *fiber.App, h *controllers.Database) {
-	incomingRoutes.Post("/api/v1/createUser", h.CreateUser)
-	incomingRoutes.Post("/api/v1/login", h.LoginUser)
+	authGroup := incomingRoutes.Group("/api/v1/auth", middleware.RedirectInterceptor, middleware.ClientIdInterceptor)
+	authGroup.Post("/createUser", h.CreateUser)
+	authGroup.Post("/login", h.LoginUser)
 
 	userGroup := incomingRoutes.Group("/api/v1/user", func(c *fiber.Ctx) error {
 		err := middleware.VerifyTokenAndDb(c, h.MongoClient, h.RedisClient)
@@ -19,5 +20,22 @@ func UserRoutes(incomingRoutes *fiber.App, h *controllers.Database) {
 	})
 	userGroup.Post("/logout", h.LogoutUser)
 	userGroup.Get("/me", h.GetMe)
-	userGroup.Get("/authenticate", h.AuthenticateUser)
+
+	ssoGroup := incomingRoutes.Group("/api/v1", func(c *fiber.Ctx) error {
+		err := middleware.VerifyTokenAndDb(c, h.MongoClient, h.RedisClient)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	ssoGroup.Get("/sso", middleware.RedirectInterceptor, middleware.ClientIdInterceptor, h.SingleSignon)
+
+	// clientGroup := incomingRoutes.Group("/api/v1/user", func(c *fiber.Ctx) error {
+	// 	err := middleware.VerifyTokenAndDb(c, h.MongoClient, h.RedisClient)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// })
+	// clientGroup.Post("/createClient", h.AuthenticateUser)
 }

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entry List</title>
+    <link rel="stylesheet" href="styles/index.css">
+</head>
+<body>
+    <div class="entry-list-container">
+        <div class="entry-list-box">
+            <img src="assets/logo.png" alt="ISTE Logo">
+            <ul id="entry-list"></ul>
+        </div>
+    </div>
+    <script src="scripts/index.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const entryList = document.getElementById('entry-list');
+
+            const localData = localStorage.getItem('userData');
+            const parsedData = JSON.parse(localData) || [];
+
+            if(parsedData.length === 0) {
+                window.location.href = '/public/login.html';
+            }
+
+            // list all the data from local storage
+            parsedData.forEach((data, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${data.user.email}`;
+                listItem.addEventListener('click', async () => {
+                    const queryString = window.location.search;
+                    const params = new URLSearchParams(queryString);
+                    const redirect = params.get('return_to');
+                    const client_id = params.get('client_id');
+                    if (redirect === null || client_id === null) {
+                        alert('Invalid request');
+                        return;
+                    }
+                    await handleSSO(data, redirect, client_id);
+                });
+                listItem.classList.add('clickable');
+                entryList.appendChild(listItem);
+            });
+        });
+    </script>
+</body>
+</html>
