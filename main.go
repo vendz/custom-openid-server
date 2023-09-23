@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -10,21 +12,23 @@ import (
 )
 
 func main() {
-	helper.LoadEnv()
-
 	app := fiber.New()
+
+	helper.LoadEnv()
+	handler := database.NewDatabase()
+
 	app.Use(cors.New())
 	app.Use(logger.New())
 
-	handler := database.NewDatabase()
+	apiGroup := app.Group("/api/v1")
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("API is Up and Running...")
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "API is Up and Running... 🚀", "status": "success"})
 	})
-	routes.UserRoutes(app, &handler)
+	routes.UserRoutes(apiGroup, &handler)
 	routes.ClientRoutes(app, &handler)
 
-	err := app.Listen(":3000")
+	err := app.Listen(os.Getenv("PORT"))
 	if err != nil {
 		panic(err)
 	}

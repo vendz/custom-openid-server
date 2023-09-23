@@ -5,23 +5,20 @@ services:
     container_name: "mongo"
     ports:
       - "27017:27017"
-    networks:
-      - "web.network"
     volumes:
       - mongodata:/data/db
       - mongodb_config:/data/configdb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
+    env_file:
+      - .env
   redis:
     container_name: "redis"
     image: redis:alpine
     ports: 
       - "6379:6379"
-    networks:
-      - "web.network"
     volumes:
       - redis-data:/data
+    env_file:
+      - .env
   web:
     build: .
     container_name: "0auth"
@@ -30,17 +27,11 @@ services:
     volumes:
       - ".:/app"
     restart: "always"
-    environment:
-      - Replica= {{.Task.Name}}
     depends_on:
       - mongo
       - redis
-    networks:
-      - "web.network"
-    deploy:
-      replicas: 1
-networks:
-  web.network:
+    env_file:
+      - .env
 volumes:
   mongodata:
   mongodb_config:
