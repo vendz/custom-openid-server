@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
+	"github.com/vendz/custom-0auth/controllers"
 	"github.com/vendz/custom-0auth/helper"
 	"github.com/vendz/custom-0auth/models"
 	"github.com/vendz/custom-0auth/utils"
@@ -16,7 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func VerifyTokenAndDb(c *fiber.Ctx, mongoClient *mongo.Client, redisClient *redis.Client) error {
+func VerifyTokenAndDb(c *fiber.Ctx, h *controllers.Database) error {
 	authHeader := c.Get("Authorization")
 	if authHeader == "" {
 		return helper.HandleError(c, fmt.Errorf("no authorization header found"), fiber.StatusUnauthorized)
@@ -28,15 +29,12 @@ func VerifyTokenAndDb(c *fiber.Ctx, mongoClient *mongo.Client, redisClient *redi
 	}
 
 	token := fields[1]
-	email, err := utils.ValidateToken(token, os.Getenv("JWT_SECRET"))
+	email, rand, err := utils.ValidateToken(token, os.Getenv("JWT_SECRET"))
 	if err != nil {
-		return helper.HandleError(c, fmt.Errorf("invalid token"), fiber.StatusUnauthorized)
+		return helper.HandleError(c, fmt.Errorf(err.Error()), fiber.StatusUnauthorized)
 	}
 
-	filter := bson.M{"email": email}
-	userCollection := mongoClient.Database("custom-auth").Collection("users")
-	var user models.User
-	err = userCollection.FindOne(context.Background(), filter).Decode(&user)
+	user, err := controllers.Database.GetCurrentUser(*h, email)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return helper.HandleError(c, fmt.Errorf("user not found"), fiber.StatusUnauthorized)
@@ -44,8 +42,8 @@ func VerifyTokenAndDb(c *fiber.Ctx, mongoClient *mongo.Client, redisClient *redi
 		return helper.HandleError(c, err, fiber.StatusInternalServerError)
 	}
 
-	rdbStr := "token:" + email
-	val, err := redisClient.Get(context.Background(), rdbStr).Result()
+	rdbStr := "token" + rand + ":" + email
+	val, err := h.RedisClient.Get(context.Background(), rdbStr).Result()
 	if err != nil {
 		if err != redis.Nil {
 			return helper.HandleError(c, err, fiber.StatusInternalServerError)
@@ -58,8 +56,9 @@ func VerifyTokenAndDb(c *fiber.Ctx, mongoClient *mongo.Client, redisClient *redi
 	}
 
 	c.Locals("email", email)
-	c.Locals("user", user)
+	c.Locals("user", &user)
 	c.Locals("token", token)
+	c.Locals("rand", rand)
 	return c.Next()
 }
 

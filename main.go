@@ -26,7 +26,7 @@ func main() {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "API is Up and Running... 🚀", "status": "success"})
 	})
 	routes.UserRoutes(apiGroup, &handler)
-	routes.ClientRoutes(app, &handler)
+	routes.ClientRoutes(apiGroup, &handler)
 
 	err := app.Listen(os.Getenv("PORT"))
 	if err != nil {

@@ -14,7 +14,7 @@ func UserRoutes(incomingRoutes fiber.Router, h *controllers.Database) {
 
 	userGroup := incomingRoutes.Group("/user")
 	userGroup.Use(func(c *fiber.Ctx) error {
-		return middleware.VerifyTokenAndDb(c, h.MongoClient, h.RedisClient)
+		return middleware.VerifyTokenAndDb(c, h)
 	})
 	userGroup.Post("/logout", h.LogoutUser)
 	userGroup.Get("/me", h.GetMe)

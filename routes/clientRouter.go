@@ -6,13 +6,10 @@ import (
 	"github.com/vendz/custom-0auth/middleware"
 )
 
-func ClientRoutes(clientRoutes *fiber.App, h *controllers.Database) {
-	clientGroup := clientRoutes.Group("/client", func(c *fiber.Ctx) error {
-		err := middleware.UserIdInterceptor(c, h.MongoClient)
-		if err != nil {
-			return err
-		}
-		return nil
+func ClientRoutes(clientRoutes fiber.Router, h *controllers.Database) {
+	clientGroup := clientRoutes.Group("/client")
+	clientGroup.Use(func(c *fiber.Ctx) error {
+		return middleware.UserIdInterceptor(c, h.MongoClient)
 	})
 	clientGroup.Post("/createClient", h.CreateClient)
 }
